@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {useFocusEffect} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {
   MapPinIcon,
@@ -36,9 +37,12 @@ const PropertyDetailsScreen = ({route, navigation}: Props) => {
   const {toggleFavorite, isFavorited: checkIsFavorited} = useFavorites();
   const isBookmarked = checkIsFavorited(propertyId);
 
-  useEffect(() => {
-    loadLastInspectionDate();
-  }, [propertyId]);
+  // Reload inspection date when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadLastInspectionDate();
+    }, [propertyId])
+  );
 
   const loadLastInspectionDate = async () => {
     try {
