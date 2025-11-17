@@ -11,13 +11,10 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {
   HeartIcon as HeartIconOutline,
-  MapPinIcon,
-  BriefcaseIcon,
-  CheckCircleIcon,
 } from 'react-native-heroicons/outline';
-import {HeartIcon as HeartIconSolid} from 'react-native-heroicons/solid';
 import {useFavorites} from '../context/FavoritesContext';
 import BottomNavBar, {NavTab} from '../components/navigation/BottomNavBar';
+import PropertyCard from '../components/property/PropertyCard';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Favorites'>;
 
@@ -115,9 +112,13 @@ const FavoritesScreen = ({navigation}: Props) => {
           </View>
         ) : (
           favoritedPropertiesList.map((property, index) => (
-            <TouchableOpacity
+            <PropertyCard
               key={property.id}
-              style={styles.propertyCard}
+              id={property.id}
+              address={property.address}
+              price={property.price}
+              imageSource={propertyImages[property.imageIndex % propertyImages.length]}
+              isFavorited={true}
               onPress={() =>
                 navigation.navigate('PropertyDetails', {
                   propertyId: property.id,
@@ -125,57 +126,11 @@ const FavoritesScreen = ({navigation}: Props) => {
                   address: property.address,
                   isFavorited: true,
                 })
-              }>
-              <View style={styles.imageContainer}>
-                <Image
-                  source={propertyImages[property.imageIndex % propertyImages.length]}
-                  style={styles.propertyImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.priceBadge}>
-                  <Text style={styles.priceBadgeText}>{property.price}</Text>
-                </View>
-              </View>
-              <View style={styles.propertyInfo}>
-                <View style={styles.propertyDetails}>
-                  <View style={styles.addressContainer}>
-                    <View style={styles.addressRow}>
-                      <MapPinIcon size={14} color="#64748b" />
-                      <Text style={styles.propertyAddress} numberOfLines={1}>
-                        {property.address.split(',')[0]}
-                      </Text>
-                    </View>
-                    <Text style={styles.propertyAddressSecondary} numberOfLines={1}>
-                      {property.address.split(',').slice(1).join(',').trim()}
-                    </Text>
-                  </View>
-                  <View style={styles.clientRow}>
-                    <BriefcaseIcon size={14} color="#64748b" />
-                    <Text style={styles.clientName} numberOfLines={1}>
-                      {property.clientName}
-                    </Text>
-                  </View>
-                  <View style={styles.dateRow}>
-                    <CheckCircleIcon size={14} color="#64748b" />
-                    <Text style={styles.dateText} numberOfLines={1}>
-                      N/A
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              <TouchableOpacity
-                style={styles.heartIcon}
-                onPress={() => {
-                  toggleFavorite(property.id);
-                }}
-                onStartShouldSetResponder={() => true}
-                onResponderGrant={() => {
-                  toggleFavorite(property.id);
-                }}
-                onResponderTerminationRequest={() => false}>
-                <HeartIconSolid size={24} color="#ef4444" />
-              </TouchableOpacity>
-            </TouchableOpacity>
+              }
+              onToggleFavorite={() => toggleFavorite(property.id)}
+              variant="horizontal"
+              clientName={property.clientName}
+            />
           ))
         )}
         <View style={styles.bottomSpacer} />
@@ -237,101 +192,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     padding: 20,
-  },
-  propertyCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    overflow: 'hidden',
-    flexDirection: 'row',
-  },
-  imageContainer: {
-    width: 120,
-    height: 120,
-    position: 'relative',
-  },
-  propertyImage: {
-    width: '100%',
-    height: '100%',
-  },
-  priceBadge: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: '#1e3a5f',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  priceBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#fff',
-    lineHeight: 14,
-    textAlignVertical: 'center',
-  },
-  propertyInfo: {
-    flex: 1,
-    padding: 16,
-  },
-  propertyDetails: {
-    flex: 1,
-  },
-  heartIcon: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-  },
-  addressContainer: {
-    gap: 2,
-  },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  propertyAddress: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-    flex: 1,
-  },
-  propertyAddressSecondary: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-    marginLeft: 18,
-  },
-  clientRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 10,
-  },
-  clientName: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-    flex: 1,
-  },
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 10,
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-    flex: 1,
   },
   emptyState: {
     flex: 1,

@@ -13,17 +13,13 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useFocusEffect} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {
-  HeartIcon as HeartIconOutline,
-  MapPinIcon,
-  BriefcaseIcon,
-  CheckCircleIcon,
   EllipsisHorizontalCircleIcon,
 } from 'react-native-heroicons/outline';
-import {HeartIcon as HeartIconSolid} from 'react-native-heroicons/solid';
 import {Inspection} from '../types';
 import {loadInspections, clearAllData} from '../services/storageService';
 import {useFavorites} from '../context/FavoritesContext';
 import BottomNavBar, {NavTab} from '../components/navigation/BottomNavBar';
+import PropertyCard from '../components/property/PropertyCard';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'YourInspections'>;
 
@@ -191,71 +187,21 @@ const YourInspectionsScreen = ({navigation}: Props) => {
           </View>
         ) : (
           inspections.map((inspection, index) => (
-          <TouchableOpacity
-            key={inspection.id}
-            style={styles.inspectionCard}
-            onPress={() => openInspection(inspection)}>
-            <View style={styles.imageContainer}>
-              <Image
-                source={getPropertyImage(index)}
-                style={styles.inspectionImage}
-                resizeMode="cover"
-              />
-              <View style={styles.priceBadge}>
-                <Text style={styles.priceBadgeText}>
-                  {getPropertyPrice(inspection.propertyId)}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.inspectionInfo}>
-              <View style={styles.inspectionDetails}>
-                <View style={styles.propertyContainer}>
-                  <View style={styles.propertyRow}>
-                    <MapPinIcon size={14} color="#64748b" />
-                    <Text style={styles.propertyAddress} numberOfLines={1}>
-                      {(inspection.address || inspection.propertyId).split(',')[0]}
-                    </Text>
-                  </View>
-                  <Text style={styles.propertyAddressSecondary} numberOfLines={1}>
-                    {(inspection.address || inspection.propertyId).split(',').slice(1).join(',').trim()}
-                  </Text>
-                </View>
-                <View style={styles.inspectorRow}>
-                  <BriefcaseIcon size={14} color="#64748b" />
-                  <Text style={styles.inspectorName} numberOfLines={1}>
-                    {inspection.inspectorName || 'Property Services Inc'}
-                  </Text>
-                </View>
-                <View style={styles.dateRow}>
-                  <CheckCircleIcon size={14} color="#64748b" />
-                  <Text style={styles.dateText} numberOfLines={1}>
-                    {inspection.inspectionDate.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.heartIcon}
-              onPress={() => {
-                toggleFavorite(inspection.propertyId);
-              }}
-              onStartShouldSetResponder={() => true}
-              onResponderGrant={() => {
-                toggleFavorite(inspection.propertyId);
-              }}
-              onResponderTerminationRequest={() => false}>
-              {favoritedProperties.has(inspection.propertyId) ? (
-                <HeartIconSolid size={24} color="#ef4444" />
-              ) : (
-                <HeartIconOutline size={24} color="#64748b" />
-              )}
-            </TouchableOpacity>
-          </TouchableOpacity>
-        ))
+            <PropertyCard
+              key={inspection.id}
+              id={inspection.id}
+              address={inspection.address || inspection.propertyId}
+              price={getPropertyPrice(inspection.propertyId)}
+              imageSource={getPropertyImage(index)}
+              isFavorited={favoritedProperties.has(inspection.propertyId)}
+              onPress={() => openInspection(inspection)}
+              onToggleFavorite={() => toggleFavorite(inspection.propertyId)}
+              variant="horizontal"
+              inspectorName={inspection.inspectorName}
+              inspectionDate={inspection.inspectionDate}
+              status={inspection.status}
+            />
+          ))
         )}
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -320,101 +266,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-  },
-  inspectionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-    overflow: 'hidden',
-    flexDirection: 'row',
-  },
-  imageContainer: {
-    width: 120,
-    height: 120,
-    position: 'relative',
-  },
-  inspectionImage: {
-    width: '100%',
-    height: '100%',
-  },
-  priceBadge: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: '#1e3a5f',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  priceBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#fff',
-    lineHeight: 14,
-    textAlignVertical: 'center',
-  },
-  inspectionInfo: {
-    flex: 1,
-    padding: 16,
-  },
-  inspectionDetails: {
-    flex: 1,
-  },
-  propertyContainer: {
-    gap: 2,
-  },
-  propertyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  propertyAddress: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-    flex: 1,
-  },
-  propertyAddressSecondary: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-    marginLeft: 18,
-  },
-  inspectorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 10,
-  },
-  inspectorName: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-    flex: 1,
-  },
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 10,
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#64748b',
-    fontWeight: '400',
-    flex: 1,
-  },
-  heartIcon: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
   },
   emptyState: {
     flex: 1,

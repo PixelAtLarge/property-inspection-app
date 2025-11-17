@@ -23,11 +23,10 @@ import {
   CameraIcon,
   CubeTransparentIcon,
   ClipboardDocumentCheckIcon,
-  HeartIcon,
   MagnifyingGlassIcon,
-  CheckIcon,
 } from 'react-native-heroicons/outline';
 import {HeartIcon as HeartIconSolid} from 'react-native-heroicons/solid';
+import PropertyCard from '../components/property/PropertyCard';
 import {FONTS} from '../constants/fonts';
 import {useFavorites} from '../context/FavoritesContext';
 
@@ -303,9 +302,16 @@ const HomeScreen = ({navigation}: Props) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.recentScroll}>
             {nearbyProperties.map((item, index) => (
-              <TouchableOpacity
+              <PropertyCard
                 key={item.id}
-                style={styles.recentCard}
+                variant="vertical"
+                id={item.id}
+                address={item.address}
+                propertyId={item.propertyId}
+                inspectorName={item.inspectorName}
+                price={getPropertyPrice(item.propertyId)}
+                imageSource={getPropertyImage(index)}
+                isFavorited={favoritedProperties.has(item.propertyId)}
                 onPress={() =>
                   navigation.navigate('PropertyDetails', {
                     propertyId: item.propertyId,
@@ -315,40 +321,12 @@ const HomeScreen = ({navigation}: Props) => {
                     fakePropertyId: getFakePropertyId(item.propertyId),
                     isFavorited: favoritedProperties.has(item.propertyId),
                   })
-                }>
-                <View style={styles.recentCardImage}>
-                  <Image
-                    source={getPropertyImage(index)}
-                    style={styles.placeholderImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.priceBadge}>
-                    <Text style={styles.priceBadgeText}>
-                      {getPropertyPrice(item.propertyId)}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.favoriteButton}
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(item.propertyId);
-                    }}>
-                    {favoritedProperties.has(item.propertyId) ? (
-                      <HeartIconSolid size={24} color="#ef4444" />
-                    ) : (
-                      <HeartIcon size={24} color="#fff" />
-                    )}
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.recentCardInfo}>
-                  <Text style={styles.recentCardTitle} numberOfLines={1}>
-                    {item.propertyId}
-                  </Text>
-                  <Text style={styles.recentCardSubtitle} numberOfLines={1}>
-                    {item.inspectorName}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+                }
+                onToggleFavorite={(e) => {
+                  e?.stopPropagation?.();
+                  toggleFavorite(item.propertyId);
+                }}
+              />
             ))}
           </ScrollView>
         </View>
@@ -372,90 +350,31 @@ const HomeScreen = ({navigation}: Props) => {
             </View>
           ) : (
             inspections.slice(0, 3).map((item, index) => (
-              <TouchableOpacity
+              <PropertyCard
                 key={item.id}
-                style={styles.featuredCard}
+                variant="featured"
+                id={item.id}
+                address={item.address || item.propertyId}
+                propertyId={item.propertyId}
+                inspectorName={item.inspectorName || 'Property Services Inc'}
+                inspectionDate={item.inspectionDate}
+                price={getPropertyPrice(item.propertyId)}
+                imageSource={getPropertyImage(index)}
+                isFavorited={favoritedProperties.has(item.propertyId)}
+                notes={item.notes}
+                photos={item.photos}
+                floorPlan={item.floorPlan}
                 onPress={() =>
                   navigation.navigate('InspectionDetail', {
                     inspectionId: item.id,
                     propertyId: getFakePropertyId(item.propertyId),
                   })
-                }>
-                <View style={styles.featuredImageContainer}>
-                  <Image
-                    source={getPropertyImage(index)}
-                    style={styles.featuredImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.priceBadge}>
-                    <Text style={styles.priceBadgeText}>
-                      {getPropertyPrice(item.propertyId)}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.favoriteButton}
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(item.propertyId);
-                    }}>
-                    {favoritedProperties.has(item.propertyId) ? (
-                      <HeartIconSolid size={24} color="#ef4444" />
-                    ) : (
-                      <HeartIcon size={24} color="#fff" />
-                    )}
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.featuredInfo}>
-                  <View style={styles.featuredHeader}>
-                    <View style={{flex: 1}}>
-                      <Text style={styles.recentCardTitle} numberOfLines={1}>
-                        {(item.address || item.propertyId).split(',')[0]}
-                      </Text>
-                      <Text style={styles.recentCardSubtitle} numberOfLines={1}>
-                        {item.inspectorName || 'Property Services Inc'}
-                      </Text>
-                    </View>
-                    <View style={styles.inspectedBadge}>
-                      <CheckIcon size={16} color="#10b981" />
-                      <Text style={styles.inspectedText}>
-                        {item.inspectionDate.toLocaleDateString('en-US', {month: '2-digit', day: '2-digit', year: 'numeric'})}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.featuredActions}>
-                    <View style={styles.actionButton}>
-                      <DocumentTextIcon
-                        size={20}
-                        color={item.notes && item.notes.length > 0 ? "#1e3a5f" : "#cbd5e1"}
-                      />
-                    </View>
-                    <View style={styles.actionButton}>
-                      <CameraIcon
-                        size={20}
-                        color={item.photos && item.photos.length > 0 ? "#1e3a5f" : "#cbd5e1"}
-                      />
-                    </View>
-                    <View style={styles.actionButton}>
-                      <CubeTransparentIcon
-                        size={20}
-                        color={item.floorPlan?.rooms && item.floorPlan.rooms.length > 0 ? "#1e3a5f" : "#cbd5e1"}
-                      />
-                    </View>
-                    <TouchableOpacity
-                      style={styles.detailsButton}
-                      onPress={() =>
-                        navigation.navigate('InspectionDetail', {
-                          inspectionId: item.id,
-                          propertyId: getFakePropertyId(item.propertyId),
-                        })
-                      }>
-                      <Text style={styles.detailsButtonText}>View</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableOpacity>
+                }
+                onToggleFavorite={(e) => {
+                  e?.stopPropagation?.();
+                  toggleFavorite(item.propertyId);
+                }}
+              />
             ))
           )}
         </View>
