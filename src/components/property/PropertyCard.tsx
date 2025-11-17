@@ -442,4 +442,16 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PropertyCard;
+// Memoize component to prevent unnecessary re-renders
+export default React.memo(PropertyCard, (prevProps, nextProps) => {
+  // Return true if props are equal (no re-render needed)
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.isFavorited === nextProps.isFavorited &&
+    prevProps.status === nextProps.status &&
+    prevProps.variant === nextProps.variant &&
+    prevProps.notes === nextProps.notes &&
+    prevProps.photos?.length === nextProps.photos?.length &&
+    prevProps.floorPlan?.rooms?.length === nextProps.floorPlan?.rooms?.length
+  );
+});

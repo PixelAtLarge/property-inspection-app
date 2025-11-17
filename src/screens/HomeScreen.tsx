@@ -95,14 +95,27 @@ const HomeScreen = ({navigation}: Props) => {
     }
   };
 
-  const openInspection = (inspectionId: string, propertyId?: string) => {
-    navigation.navigate('InspectionDetail', {
-      inspectionId,
-      propertyId: propertyId ? getFakePropertyId(propertyId) : undefined,
-    });
-  };
+  const getFakePropertyId = useCallback((addressOrId: string) => {
+    const fakeIds: {[key: string]: string} = {
+      '2550 Van Ness Ave': 'PROP-2024-104',
+      '456 Oak Ave': 'PROP-2024-102',
+      '789 Pine Blvd': 'PROP-2024-103',
+      '1425 Market St': 'PROP-2024-105',
+    };
+    return fakeIds[addressOrId] || 'PROP-2024-100';
+  }, []);
 
-  const getStatusColor = (status: string) => {
+  const getPropertyPrice = useCallback((propertyId: string) => {
+    const prices: {[key: string]: string} = {
+      '2550 Van Ness Ave': '$3,450,000',
+      '456 Oak Ave': '$3,200,000',
+      '789 Pine Blvd': '$2,650,000',
+      '1425 Market St': '$2,950,000',
+    };
+    return prices[propertyId] || '$0';
+  }, []);
+
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case 'completed':
         return '#10b981';
@@ -113,33 +126,24 @@ const HomeScreen = ({navigation}: Props) => {
       default:
         return '#6b7280';
     }
-  };
+  }, []);
 
-  const getStatusLabel = (status: string) => {
-    return status.split('-').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
+  const getStatusLabel = useCallback((status: string) => {
+    return status
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }, []);
 
-  const getPropertyPrice = (propertyId: string) => {
-    const prices: {[key: string]: string} = {
-      '2550 Van Ness Ave': '$3,450,000',
-      '456 Oak Ave': '$3,200,000',
-      '789 Pine Blvd': '$2,650,000',
-      '1425 Market St': '$2,950,000',
-    };
-    return prices[propertyId] || '$0';
-  };
-
-  const getFakePropertyId = (addressOrId: string) => {
-    const fakeIds: {[key: string]: string} = {
-      '2550 Van Ness Ave': 'PROP-2024-104',
-      '456 Oak Ave': 'PROP-2024-102',
-      '789 Pine Blvd': 'PROP-2024-103',
-      '1425 Market St': 'PROP-2024-105',
-    };
-    return fakeIds[addressOrId] || 'PROP-2024-100';
-  };
+  const openInspection = useCallback(
+    (inspectionId: string, propertyId?: string) => {
+      navigation.navigate('InspectionDetail', {
+        inspectionId,
+        propertyId: propertyId ? getFakePropertyId(propertyId) : undefined,
+      });
+    },
+    [navigation, getFakePropertyId]
+  );
 
   // Don't filter the main content - search dropdown is an overlay
   // The home screen content should remain static when searching
