@@ -11,23 +11,20 @@ import {
   Image,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {BlurView} from '@react-native-community/blur';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useFocusEffect} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {Inspection} from '../types';
 import {loadInspections, saveInspection} from '../services/storageService';
 import NetInfo from '@react-native-community/netinfo';
+import BottomNavBar, {NavTab} from '../components/navigation/BottomNavBar';
 import {
   DocumentTextIcon,
   CameraIcon,
   CubeTransparentIcon,
   ClipboardDocumentCheckIcon,
-  UserIcon,
   HeartIcon,
-  PlusCircleIcon,
   MagnifyingGlassIcon,
-  HomeIcon,
   CheckIcon,
 } from 'react-native-heroicons/outline';
 import {HeartIcon as HeartIconSolid} from 'react-native-heroicons/solid';
@@ -465,43 +462,28 @@ const HomeScreen = ({navigation}: Props) => {
       </ScrollView>
 
       {/* Bottom Navigation Bar */}
-      <BlurView
-        style={styles.bottomNavBar}
-        blurType="light"
-        blurAmount={10}
-        reducedTransparencyFallbackColor="white">
-        <View style={styles.navInnerContainer}>
-          <TouchableOpacity style={styles.navItem}>
-            <View style={styles.navIconActive}>
-              <HomeIcon size={28} color="#fff" />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => navigation.navigate('Favorites')}>
-            <HeartIcon size={28} color="#64748b" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={createNewInspection}>
-            <PlusCircleIcon size={32} color="#64748b" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => navigation.navigate('YourInspections')}>
-            <ClipboardDocumentCheckIcon size={28} color="#64748b" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => navigation.navigate('Profile')}>
-            <UserIcon size={28} color="#64748b" />
-          </TouchableOpacity>
-        </View>
-      </BlurView>
+      <BottomNavBar
+        activeTab="home"
+        onNavigate={(tab: NavTab) => {
+          switch (tab) {
+            case 'home':
+              // Already on home
+              break;
+            case 'favorites':
+              navigation.navigate('Favorites');
+              break;
+            case 'create':
+              createNewInspection();
+              break;
+            case 'inspections':
+              navigation.navigate('YourInspections');
+              break;
+            case 'profile':
+              navigation.navigate('Profile');
+              break;
+          }
+        }}
+      />
     </View>
   );
 };

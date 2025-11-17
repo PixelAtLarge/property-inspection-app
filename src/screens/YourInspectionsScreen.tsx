@@ -9,16 +9,11 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {BlurView} from '@react-native-community/blur';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useFocusEffect} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {
-  HomeIcon,
   HeartIcon as HeartIconOutline,
-  PlusCircleIcon,
-  ClipboardDocumentCheckIcon,
-  UserIcon,
   MapPinIcon,
   BriefcaseIcon,
   CheckCircleIcon,
@@ -28,6 +23,7 @@ import {HeartIcon as HeartIconSolid} from 'react-native-heroicons/solid';
 import {Inspection} from '../types';
 import {loadInspections, clearAllData} from '../services/storageService';
 import {useFavorites} from '../context/FavoritesContext';
+import BottomNavBar, {NavTab} from '../components/navigation/BottomNavBar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'YourInspections'>;
 
@@ -265,43 +261,28 @@ const YourInspectionsScreen = ({navigation}: Props) => {
       </ScrollView>
 
       {/* Bottom Navigation Bar */}
-      <BlurView
-        style={styles.bottomNavBar}
-        blurType="light"
-        blurAmount={10}
-        reducedTransparencyFallbackColor="white">
-        <View style={styles.navInnerContainer}>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => navigation.navigate('Home')}>
-            <HomeIcon size={28} color="#64748b" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => navigation.navigate('Favorites')}>
-            <HeartIconOutline size={28} color="#64748b" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => navigation.navigate('InspectionDetail', {})}>
-            <PlusCircleIcon size={32} color="#64748b" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <View style={styles.navIconActive}>
-              <ClipboardDocumentCheckIcon size={28} color="#fff" />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => navigation.navigate('Profile')}>
-            <UserIcon size={28} color="#64748b" />
-          </TouchableOpacity>
-        </View>
-      </BlurView>
+      <BottomNavBar
+        activeTab="inspections"
+        onNavigate={(tab: NavTab) => {
+          switch (tab) {
+            case 'home':
+              navigation.navigate('Home');
+              break;
+            case 'favorites':
+              navigation.navigate('Favorites');
+              break;
+            case 'create':
+              navigation.navigate('InspectionDetail', {});
+              break;
+            case 'inspections':
+              // Already on inspections
+              break;
+            case 'profile':
+              navigation.navigate('Profile');
+              break;
+          }
+        }}
+      />
     </View>
   );
 };
