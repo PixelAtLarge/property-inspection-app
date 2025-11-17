@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   Image,
   Modal,
@@ -14,6 +14,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/AppNavigator';
 import {
   EllipsisHorizontalCircleIcon,
+  ClipboardDocumentCheckIcon,
 } from 'react-native-heroicons/outline';
 import {Inspection} from '../types';
 import {loadInspections, clearAllData} from '../services/storageService';
@@ -134,6 +135,43 @@ const YourInspectionsScreen = ({navigation}: Props) => {
     setDropdownVisible(!dropdownVisible);
   };
 
+  const renderInspectionItem = useCallback(
+    ({item, index}: {item: Inspection; index: number}) => (
+      <PropertyCard
+        id={item.id}
+        address={item.address || item.propertyId}
+        price={getPropertyPrice(item.propertyId)}
+        imageSource={getPropertyImage(index)}
+        isFavorited={favoritedProperties.has(item.propertyId)}
+        onPress={() => openInspection(item)}
+        onToggleFavorite={() => toggleFavorite(item.propertyId)}
+        variant="horizontal"
+        inspectorName={item.inspectorName}
+        inspectionDate={item.inspectionDate}
+        status={item.status}
+      />
+    ),
+    [favoritedProperties]
+  );
+
+  const renderEmptyComponent = useCallback(
+    () => (
+      <View style={styles.emptyState}>
+        <ClipboardDocumentCheckIcon size={64} color="#cbd5e1" />
+        <Text style={styles.emptyStateTitle}>No inspections yet</Text>
+        <Text style={styles.emptyStateText}>
+          Start inspecting properties to see them here
+        </Text>
+      </View>
+    ),
+    []
+  );
+
+  const keyExtractor = useCallback(
+    (item: Inspection) => item.id,
+    []
+  );
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -173,38 +211,20 @@ const YourInspectionsScreen = ({navigation}: Props) => {
         </TouchableWithoutFeedback>
       </Modal>
 
-      <ScrollView
+      <FlatList
+        data={inspections}
+        renderItem={renderInspectionItem}
+        keyExtractor={keyExtractor}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        {inspections.length === 0 ? (
-          <View style={styles.emptyState}>
-            <ClipboardDocumentCheckIcon size={64} color="#cbd5e1" />
-            <Text style={styles.emptyStateTitle}>No inspections yet</Text>
-            <Text style={styles.emptyStateText}>
-              Start inspecting properties to see them here
-            </Text>
-          </View>
-        ) : (
-          inspections.map((inspection, index) => (
-            <PropertyCard
-              key={inspection.id}
-              id={inspection.id}
-              address={inspection.address || inspection.propertyId}
-              price={getPropertyPrice(inspection.propertyId)}
-              imageSource={getPropertyImage(index)}
-              isFavorited={favoritedProperties.has(inspection.propertyId)}
-              onPress={() => openInspection(inspection)}
-              onToggleFavorite={() => toggleFavorite(inspection.propertyId)}
-              variant="horizontal"
-              inspectorName={inspection.inspectorName}
-              inspectionDate={inspection.inspectionDate}
-              status={inspection.status}
-            />
-          ))
-        )}
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={renderEmptyComponent}
+        ListFooterComponent={<View style={styles.bottomSpacer} />}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={true}
+      />
 
       {/* Bottom Navigation Bar */}
       <BottomNavBar
